@@ -1,0 +1,24 @@
+const jwt = require('jsonwebtoken')
+
+const jwtMiddleware = (deps) => {
+    return (req, res, next) => {
+
+        if (!deps.exclusions.includes(req.href())) {
+
+            const token = req.headers['x-access-token']
+            if (!token) {
+                res.send(403, { error: 'Not authorized.' })
+                return false
+            }
+
+            try {
+                req.decoded = jwt.verify(token, process.env.JWT_SECRET)
+            } catch (error) {
+                res.send(403, { error: 'Not authorized.' })
+                return false
+            }
+        }
+        next()
+    }
+}
+module.exports = jwtMiddleware
